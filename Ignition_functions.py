@@ -12,16 +12,29 @@ MIT Liscense or sum shit idk
 """
 import math
 import sympy as sym
-import tkinter
+import tkinter as tk
 import PIL
 import ttkbootstrap as ttk #used to make the app look a little nicer. For use with tkinter but not sure I want to continue with that
 from ttkbootstrap.constants import LEFT, RIGHT, TOP, BOTTOM, CENTER #specific constants instead of wildcard import
-
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends._backend_tk import NavigationToolbar2Tk
 
 class Ignition:
-    def __init__(self):
-        self.gamma = 2 #not sure if I need to init every single variable used. Revist later
-        self.root = tkinter.Tk()
+    def __init__(self,master):
+        self.master = master
+        master.title('Ignition V 0.0.1')
+        
+        self.master.grid_columnconfigure(0,weight=1)
+        self.master.grid_rowconfigure(0,weight=1)
+        
+        self.plot_frame = ttk.Frame(self.master)
+        self.plot_frame.grid(row=0,column=0,sticky=ttk.NSEW)
+        self.plot_frame.grid_columnconfigure(0,weight=1)
+        self.plot_frame.grid_rowconfigure(0,weight=0)
+        
+        self.fig, self.ax, self.canvas, self.toolbar = self.plotstuff(self.plot_frame)
         return
     
     def aastar(self,M,gamma):
@@ -77,9 +90,28 @@ class Ignition:
         
         return
 
-    def plotstuff(self):
-        #Implement later
-        return
+    def plotstuff(self,parent_frame, title):
+        figure = Figure(figsize=(6,4),dpi=100)
+        ax = figure.add_subplot(111)
+        ax.set_title(title)
+        ax.set_xlabel('Axial Distance (m)')
+        ax.set_ylabel('Flow Parameters')
+        ax.grid(True)
+        
+        canvas = FigureCanvasTkAgg(figure,master=parent_frame)
+        canvas_widget = canvas.get_tk_widget()
+        canvas_widget.pack(side=ttk.TOP,fill=ttk.BOTH,expand=True)
+        
+        toolbar = NavigationToolbar2Tk(canvas,parent_frame)
+        toolbar.update()
+        toolbar.pack(side=ttk.BOTTOM,fill=ttk.X)
+        
+        canvas.draw()
+        return figure,ax, canvas, toolbar
+    
+    def update_machplt(self):
+        self.ax1.clear()
+        
     
     def Combustion(self,mdot_in,mdot_fuel,rho_air):
         mdot_in = mdot_in*10**-3
@@ -107,6 +139,8 @@ class Ignition:
         
         return
     
+    def StartButton(self):
+        return
     
     def ResetButton(self):
         #Implement later
@@ -117,7 +151,7 @@ class Ignition:
         return
 
     def run(self):
-        self.root.mainloop()
+        return
 
 
 class UnitConversionToolbox:
@@ -340,12 +374,9 @@ class Settings:
         #TODO: implement once GUI is setup
         return
     def theme(self):
-        #TODO: implement once GUI is setup
-        # th = cbo.get()
-        # style.theme_use(th)
-        # theme_selected.configure(text=th)
-        # theme_cbo.selection_clear()
-        # default.focus_set()
+
+        
+        
         return
     def fontstyle(self):
         #TODO: implement once GUI is setup
@@ -354,3 +385,8 @@ class Settings:
         #TODO: implement once GUI is setup
         return
     
+    
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = Ignition(root)
+    root.mainloop()
