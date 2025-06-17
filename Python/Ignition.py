@@ -9,23 +9,18 @@ Written for MachWorks @ Virgnia Tech's Propulsion Subteam
 
 
 """
-import math
-import sympy as sym
-import tkinter as tk
-#import PIL
-import ttkbootstrap as ttk #used to make the app look a little nicer. For use with tkinter but not sure I want to continue with that
-from ttkbootstrap.constants import LEFT, RIGHT, TOP, BOTTOM, CENTER #specific constants instead of wildcard import
-from ttkbootstrap.scrolled import ScrolledFrame
-from ttkbootstrap import Window
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.backends._backend_tk import NavigationToolbar2Tk
-
-
-   
+import customtkinter as ctk
+from GUI.gui import GUI
+from Optimization.optimization_testing import Ignition_Optimization
+from Settings.settings import Settings
+from UnitConversionToolbox.unitconversiontoolbox import UnitConversionToolbox
+from MainCalculations.main_calculations import Ignition
     
 if __name__ == "__main__":
-    root = Window(themename='darkly')
-    app = Ignition(root)
-    app.run()
+    self.root = ctk.CTk()
+    ignition = Ignition(master)
+    settings = Settings()
+    gui = GUI(root)
+    uctb = UnitConversionToolbox()
+    optim = Ignition_Optimization()
+    
