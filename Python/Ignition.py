@@ -15,12 +15,14 @@ from Optimization.optimization_testing import Ignition_Optimization
 from Settings.settings import Settings
 from UnitConversionToolbox.unitconversiontoolbox import UnitConversionToolbox
 from MainCalculations.main_calculations import Ignition
+from Save.save import Save
     
 if __name__ == "__main__":
-    self.root = ctk.CTk()
-    ignition = Ignition(master)
-    settings = Settings()
-    gui = GUI(root)
-    uctb = UnitConversionToolbox()
-    optim = Ignition_Optimization()
+    
+    # ignition = Ignition()
+    # settings = Settings()
+    gui = GUI()
+    # uctb = UnitConversionToolbox()
+    # optim = Ignition_Optimization()
+    save = Save()
     
