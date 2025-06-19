@@ -28,17 +28,18 @@ class GUI:
         set_plotlabel = ctk.CTkLabel(settings_frame1,text='Plot Color',font=("Courier New Bold", 25))
         set_plotlabel.pack(padx=10, pady=10, anchor="w")
 
+        #Breaks the main window into frames and sets their weights
         leftframe = ctk.CTkFrame(maintab,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
         leftframe.grid(row=0,column=0, padx=10, pady=10, sticky="nsew") 
         rightframe = ctk.CTkFrame(maintab,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
         rightframe.grid(row=0,column=1, padx=10, pady=10, sticky="nsew")
-        maintab.grid_columnconfigure(0,weight=3)
-        maintab.grid_columnconfigure(1,weight=2)
+        maintab.grid_columnconfigure(0,weight=1)
+        maintab.grid_columnconfigure(1,weight=1)    #TODO: check the weights, things aren't working right atm
         maintab.grid_rowconfigure(0,weight=1)
         
         #rows for the labels and the bottom buttons. want them to be smaller than the inputs
-        leftframe.grid_rowconfigure(0,weight=1)
-        leftframe.grid_rowconfigure(2,weight=1)
+        leftframe.grid_rowconfigure(0,weight=0)
+        leftframe.grid_rowconfigure(2,weight=0)
         leftframe.grid_rowconfigure(4,weight=0)
         
         #rows for the input frames. Want them to be a bit larger than the labels
@@ -46,21 +47,21 @@ class GUI:
         leftframe.grid_rowconfigure(3,weight=2)
         leftframe.grid_columnconfigure(0,weight=1)
         inputsframe = ctk.CTkFrame(leftframe)
-        inputsframe.grid(row=1,column=0, padx=10, pady=10, sticky="nsew")
+        inputsframe.grid(row=1,column=0, padx=10, pady=10, sticky="new")
         
         
         #made a separate frame for the start, stop and reset buttons
         leftframe_bottom = ctk.CTkFrame(leftframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
-        leftframe_bottom.grid(row=4,column=0, padx=10, pady=10, sticky="nsew") 
+        leftframe_bottom.grid(row=4,column=0, padx=10, pady=10, sticky="ns") 
         leftframe_bottom.grid_rowconfigure(0,weight=1)
         leftframe_bottom.grid_columnconfigure(0,weight=1)
         leftframe_bottom.grid_columnconfigure(1,weight=1)
         leftframe_bottom.grid_columnconfigure(2,weight=1)
         
         geninputslabel = ctk.CTkLabel(leftframe,text="General Inputs",font=("Courier New Bold", 25))
-        geninputslabel.grid(row=0,column=0,padx=10,pady=10,sticky="ew")
+        geninputslabel.grid(row=0,column=0,padx=10,pady=10,sticky="new")
         combustionlabel = ctk.CTkLabel(leftframe,text="Combustion Inputs",font=("Courier New Bold", 25))
-        combustionlabel.grid(row=2,column=0,padx=10,pady=10,sticky="ew")
+        combustionlabel.grid(row=2,column=0,padx=10,pady=10,sticky="new")
         
         #Right frame will contain the plots for the geometry, temp, pressure, and mach number vs axial distance
         rightframe.grid_columnconfigure(0,weight=1)
@@ -90,7 +91,7 @@ class GUI:
             # {'label': "Blank", "value":1, "units": "Blank"},
             # {'label': "Blank", "value":1, "units": "Blank"},
         ]
-        inputs_per_column = 6
+        inputs_per_column = 5
         widget_instances = []
         for i, inp in  enumerate(input_widgets):
             col = i // inputs_per_column
@@ -114,7 +115,25 @@ class GUI:
         resetbutton = ctk.CTkButton(leftframe_bottom,text="Reset",command=None) #implement reset function later
         resetbutton.grid(row=0,column=2,padx=10,pady=10,sticky="nsew")
         
+        #combustion inputs frame. Not sure how I want to organize this entirely yet
+        combframe = ctk.CTkFrame(leftframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        combframe.grid(row=3,column=0, padx=10, pady=10, sticky="new")
+        combframe.grid_columnconfigure(0,weight=1)
+        combframetop = ctk.CTkFrame(combframe)
+        combframetop.grid(row=0,column=0,padx=10,pady=10,sticky="ew")
+        combframebottom = ctk.CTkFrame(combframe)
+        combframebottom.grid(row=1,column=0,padx=10,pady=10,sticky="ew")
         
+        fuel_label = ctk.CTkLabel(combframetop,text='Fuel Type',font=("Courier New Bold", 25))
+        fuel_label.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
+        self.fueldropdown = ctk.CTkOptionMenu(combframetop, values=["Jet-A","Propane","Butane","Methane"],command=None) #TODO: Finish later
+        self.fueldropdown.grid(row=0,column=1,padx=10,pady=10,sticky="nsew")
+        dissociation = ctk.CTkCheckBox(combframetop,text="Dissociation",command=None) #TODO: Finish later
+        dissociation.grid(row=0,column=2,padx=10,pady=10,sticky="nsew")
+
+
+
+        #TODO: remove this later
         # Add debug visualization to show frame boundaries
         def add_debug_borders():
             # Make all frames visible with colored borders for debugging
@@ -134,5 +153,5 @@ class GUI:
 
         add_debug_borders()
         self.root.mainloop() #runs the main loop
-        
-        
+    
+    
