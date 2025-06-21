@@ -41,29 +41,36 @@ class GUI:
         #rows for the labels and the bottom buttons. want them to be smaller than the inputs
         leftframe.grid_rowconfigure(0,weight=1)
         leftframe.grid_rowconfigure(2,weight=1)
-        leftframe.grid_rowconfigure(4,weight=0)
+        leftframe.grid_rowconfigure(6,weight=0)
+        leftframe.grid_rowconfigure(4,weight=1) #label for output
         
         #rows for the input frames. Want them to be a bit larger than the labels
         leftframe.grid_rowconfigure(1,weight=2)
         leftframe.grid_rowconfigure(3,weight=2)
+        leftframe.grid_rowconfigure(5,weight=2) #row for outputs
         leftframe.grid_columnconfigure(0,weight=1)
         inputsframe = ctk.CTkFrame(leftframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
-        inputsframe.grid(row=1,column=0, padx=10, pady=10, sticky="new")
+        inputsframe.grid(row=1,column=0, padx=10, pady=(0,10), sticky="new")
         
         
         #made a separate frame for the start, stop and reset buttons
         leftframe_bottom = ctk.CTkFrame(leftframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
-        leftframe_bottom.grid(row=4,column=0, padx=10, pady=10, sticky="ns") 
+        leftframe_bottom.grid(row=4,column=0, padx=10, pady=(0,10), sticky="ns") 
         leftframe_bottom.grid_rowconfigure(0,weight=1)
         leftframe_bottom.grid_columnconfigure(0,weight=1)
         leftframe_bottom.grid_columnconfigure(1,weight=1)
         leftframe_bottom.grid_columnconfigure(2,weight=1)
         
-    
-        geninputslabel = ctk.CTkLabel(leftframe,text="General Inputs",font=("Courier New Bold", 20))
-        geninputslabel.grid(row=0,column=0,padx=10,pady=10,sticky="new")
-        combustionlabel = ctk.CTkLabel(leftframe,text="Combustion Inputs",font=("Courier New Bold", 20))
-        combustionlabel.grid(row=2,column=0,padx=10,pady=0,sticky="new")
+        geninputslabel_frame = ctk.CTkFrame(leftframe)
+        geninputslabel_frame.grid(row=0,column=0,padx=10,pady=0)
+        geninputslabel = ctk.CTkLabel(geninputslabel_frame,text="General Inputs",font=("Courier New Bold", 20))
+        geninputslabel.grid(row=0,column=0,padx=10,pady=10,sticky="ns")
+        
+        # combustionlabel_frame = ctk.CTkFrame(leftframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        # combustionlabel_frame.grid(row=2,column=0,padx=0,pady=(0,10))
+        # combustionlabel = ctk.CTkLabel(combustionlabel_frame,text="Combustion Inputs",font=("Courier New Bold", 20))
+        # combustionlabel.grid(row=0,column=0,padx=10,pady=10,sticky="ns")
+        
         
         #Right frame will contain the plots for the geometry, temp, pressure, and mach number vs axial distance
         self.rightframe.grid_columnconfigure(0,weight=1)
@@ -119,22 +126,24 @@ class GUI:
         #combustion inputs frame. Not sure how I want to organize this entirely yet
         combframe = ctk.CTkFrame(leftframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
         combframe.grid(row=3,column=0, padx=10, pady=10, sticky="new")
-        combframe.grid_columnconfigure(0,weight=1)
+        combustionlabel = ctk.CTkLabel(combframe, text="Combustion Inputs", font=("Courier New Bold", 20))
+        combustionlabel.grid(row=0, column=0, padx=10, pady=10, sticky="n")
+        
         combframetop = ctk.CTkFrame(combframe)
-        combframetop.grid(row=0,column=0,padx=10,pady=10,sticky="ew")
+        combframetop.grid(row=1, column=0, padx=10, pady=(0,10), sticky="ew")
         combframemiddle = ctk.CTkFrame(combframe)
-        combframemiddle.grid(row=1,column=0,padx=10,pady=10,sticky="ew")
+        combframemiddle.grid(row=2, column=0, padx=10, pady=(0,10), sticky="ew")
         combframemiddle.grid_columnconfigure(0,weight=1)
         
         fuel_label = ctk.CTkLabel(combframetop,text='Fuel Type',font=("Computer Modern", 15))
-        fuel_label.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
+        fuel_label.grid(row=0,column=0,padx=10,pady=10,sticky="w")
         self.fueldropdown = ctk.CTkOptionMenu(combframetop, values=["Jet-A","Propane","Butane","Methane"],command=self.update_combustion_equation,font=('Computer Modern',15)) #TODO: Finish later
-        self.fueldropdown.grid(row=0,column=1,padx=10,pady=10,sticky="nsew")
+        self.fueldropdown.grid(row=0,column=1,padx=10,pady=10)
         self.dissociation_checkbox = ctk.CTkCheckBox(combframetop,text="Dissociation",command=self.update_equation_values,font=('Computer Modern',15)) #TODO: Finish later
-        self.dissociation_checkbox.grid(row=0,column=2,padx=10,pady=10,sticky="nsew")
+        self.dissociation_checkbox.grid(row=0,column=2,padx=10,pady=10,sticky="e")
         
         combframeinputs = ctk.CTkFrame(combframemiddle,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
-        combframeinputs.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
+        combframeinputs.grid(row=0,column=0,padx=10,pady=(0,10),sticky="nsew")
         combframeinputs.grid_rowconfigure(0,weight=1)
         for i in range(19):
             if i%2 == 1:
@@ -144,7 +153,7 @@ class GUI:
         self.create_combustion_inputs(combframeinputs)
         
         combframebottom = ctk.CTkFrame(combframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
-        combframebottom.grid(row=2,column=0,padx=10,pady=10,sticky="nsew")
+        combframebottom.grid(row=3,column=0,padx=10,pady=(0,10),sticky="ns")
         for i in range(6):
             if i%2==1:
                 combframebottom.grid_columnconfigure(i, weight=1)
@@ -163,16 +172,39 @@ class GUI:
             widget.grid(row=0, column=col)
             widget_instances_bottom.append(widget)
         
-        # {'label': "EGT", "value":800, "units": "C"},
+        
             
 
         #Plot stuff
         self.setup_plots(self.rightframe)
+        
+        self.output_label_frame = ctk.CTkFrame(leftframe, border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        self.output_label_frame.grid(row=4,column=0,padx=10,pady=(0,10),sticky="nsew")
+        self.output_label = ctk.CTkLabel(self.output_label_frame, text="Outputs", font=("Computer Modern",20))
+        self.output_label.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
+        
+        self.output_frame = ctk.CTkFrame(leftframe, border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        self.output_frame.grid(row=5,column=0,padx=10,pady=(0,10),sticky="nsew")
+        
+        output_widgets = [
+            {'label': "Thrust Increase", "value": 0, "units": "N"},
+            {'label': "Combustion Temperature", "value": 0, "units": "K"},
+            {'label': "Combustion Pressure", "value": 0, "units": "Pa"},
+            {'label': "Exit Mach Number", "value": 0, "units": ""},
+            {'label': "\u03A6", "value": 0, "units": ""},
+            {'label': "𝑓 act", "value": 0, "units": ""},
+            {'label': "𝑓 stoich", "value": 0, "units": ""},
+        ]
+        widget_instances_output = []
+        for i, out in enumerate(output_widgets):
+            col = i % 2
+            row = i // 2
+            widget = MainInputsWidget(self.output_frame, value=str(out["value"]), label_front=out["label"], label_rear=out["units"])
+            widget.grid(row=row, column=col)
+            widget_instances_output.append(widget)
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close) #handles closing the window properly
         self.root.mainloop() #runs the main loop
-    
-    
     def setup_plots(self, frame):
         frame.grid_rowconfigure(0,weight=1) #was going to make the geometry plot larger but looks bad
         frame.grid_rowconfigure(1,weight=1)
@@ -408,4 +440,4 @@ class GUI:
             
         if hasattr(self, 'dissociation_checkbox'):
             self.update_equation_values()
-        
+
