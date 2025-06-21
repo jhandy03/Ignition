@@ -20,6 +20,7 @@ class GUI:
         tabs = ctk.CTkTabview(self.root, width=300, height=300, anchor="w",border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b") #anchor='w' make them left aligned
         tabs.pack(padx=20, pady=20, anchor="w",expand=True,fill='both')
         tabs.add("Main")
+        tabs.add("Unit Conversion Toolbox")
         tabs.add("Settings")
         maintab = tabs.tab("Main")
         settingstab = tabs.tab("Settings")  #may add more later
@@ -76,7 +77,6 @@ class GUI:
             {'label': "Gamma", "value":1.4, "units": ""},
             {'label': "R", "value":287, "units": "J/(kg*K)"},
             {'label': "Air Density", "value":1.225, "units": "kg/m^3"},
-            {'label': "EGT", "value":800, "units": "C"},
             {'label': "Exit Velocity", "value":1200, "units": "km/hr"},
             {'label': "Blowout Velocity Parameter", "value":1, "units": ""},
             {'label': "Ignition Time Parameter", "value":1, "units": ""},
@@ -92,7 +92,7 @@ class GUI:
             # {'label': "Blank", "value":1, "units": "Blank"},
             # {'label': "Blank", "value":1, "units": "Blank"},
         ]
-        inputs_per_column = 8
+        inputs_per_column = 7
         widget_instances = []
         for i, inp in  enumerate(input_widgets):
             col = i // inputs_per_column
@@ -122,8 +122,9 @@ class GUI:
         combframe.grid_columnconfigure(0,weight=1)
         combframetop = ctk.CTkFrame(combframe)
         combframetop.grid(row=0,column=0,padx=10,pady=10,sticky="ew")
-        combframebottom = ctk.CTkFrame(combframe)
-        combframebottom.grid(row=1,column=0,padx=10,pady=10,sticky="ew")
+        combframemiddle = ctk.CTkFrame(combframe)
+        combframemiddle.grid(row=1,column=0,padx=10,pady=10,sticky="ew")
+        combframemiddle.grid_columnconfigure(0,weight=1)
         
         fuel_label = ctk.CTkLabel(combframetop,text='Fuel Type',font=("Computer Modern", 15))
         fuel_label.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
@@ -132,7 +133,7 @@ class GUI:
         self.dissociation_checkbox = ctk.CTkCheckBox(combframetop,text="Dissociation",command=self.update_equation_values,font=('Computer Modern',15)) #TODO: Finish later
         self.dissociation_checkbox.grid(row=0,column=2,padx=10,pady=10,sticky="nsew")
         
-        combframeinputs = ctk.CTkFrame(combframebottom,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        combframeinputs = ctk.CTkFrame(combframemiddle,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
         combframeinputs.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
         combframeinputs.grid_rowconfigure(0,weight=1)
         for i in range(19):
@@ -141,6 +142,28 @@ class GUI:
             else:
                 combframeinputs.grid_columnconfigure(i,weight=1)
         self.create_combustion_inputs(combframeinputs)
+        
+        combframebottom = ctk.CTkFrame(combframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        combframebottom.grid(row=2,column=0,padx=10,pady=10,sticky="nsew")
+        for i in range(6):
+            if i%2==1:
+                combframebottom.grid_columnconfigure(i, weight=1)
+            else:
+                combframebottom.grid_columnconfigure(i, weight=1)
+        
+        combustion_bottom_widgets = [
+            {'label': "Exhaust Gas Temperature", "value": 1073.15, "units": "K"},
+            {'label': "Exit Pressure", "value": 101325, "units": "Pa"},
+        ]
+        
+        widget_instances_bottom = []
+        for i, inp in enumerate(combustion_bottom_widgets):
+            col = i * 3
+            widget = MainInputsWidget(combframebottom, value=str(inp["value"]), label_front=inp["label"], label_rear=inp["units"])
+            widget.grid(row=0, column=col)
+            widget_instances_bottom.append(widget)
+        
+        # {'label': "EGT", "value":800, "units": "C"},
             
 
         #Plot stuff
@@ -236,12 +259,19 @@ class GUI:
             self.mol_water.delete(0, 'end')
             self.mol_water.insert(0, f"{mol_h2o:.1f}")
             
-            self.plus_co_label.grid(row=0,column=20,padx=5,pady=5)
-            self.co_label.grid(row=0,column=21,padx=5,pady=5)
+            # Show all CO components by putting them back in the grid
+            self.plus_co_label.grid(row=0, column=20, padx=5, pady=5)
+            self.co.grid(row=0, column=21, padx=5, pady=5)  # Show the CO entry field
+            self.co_label.grid(row=0, column=22, padx=5, pady=5)
             
-            self.co_label.configure(text=f"{mol_co:.1f} CO")
-            self.plus_co_label.configure(text_color=('white','white'))  
+            # Update the CO value
+            self.co.delete(0, 'end')
+            self.co.insert(0, f"{mol_co:.1f}")
+            
+            # Restore normal appearance
+            self.plus_co_label.configure(text_color=('white', 'white'))
         else:
+            # Hide dissociation products
             mol_co2 = C
             mol_h2o = H
             
@@ -251,7 +281,9 @@ class GUI:
             self.mol_water.delete(0, 'end')
             self.mol_water.insert(0, f"{mol_h2o:.1f}")
             
+            # Remove all CO components from the grid
             self.plus_co_label.grid_remove()
+            self.co.grid_remove()  # Hide the CO entry field
             self.co_label.grid_remove()
             
     def get_fuel_atoms(self, fuel_selection):
@@ -331,8 +363,11 @@ class GUI:
         self.plus_co_label = ctk.CTkLabel(frame, text='+',font=('Computer Modern', 15))
         self.plus_co_label.grid(row=0,column=20,padx=5,pady=5)
         self.plus_co_label.configure(fg_color="#2b2b2b")
-        self.co_label = ctk.CTkLabel(frame, text='0 CO', font=('Computer Modern', 15))
-        self.co_label.grid(row=0,column=21,padx=5,pady=5)
+        self.co = ctk.CTkEntry(frame, width=30)
+        self.co.insert(0, '0')
+        self.co.grid(row=0,column=21,padx=5,pady=5)
+        self.co_label = ctk.CTkLabel(frame, text='CO', font=('Computer Modern', 15))
+        self.co_label.grid(row=0,column=22,padx=5,pady=5)
 
         self.update_combustion_equation(self.fueldropdown.get())
     
