@@ -49,28 +49,22 @@ class GUI:
         leftframe.grid_rowconfigure(3,weight=2)
         leftframe.grid_rowconfigure(5,weight=2) #row for outputs
         leftframe.grid_columnconfigure(0,weight=1)
-        inputsframe = ctk.CTkFrame(leftframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        inputsframe = ctk.CTkFrame(leftframe)
         inputsframe.grid(row=1,column=0, padx=10, pady=(0,10), sticky="new")
         
         
         #made a separate frame for the start, stop and reset buttons
-        leftframe_bottom = ctk.CTkFrame(leftframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        leftframe_bottom = ctk.CTkFrame(leftframe,fg_color="transparent")
         leftframe_bottom.grid(row=4,column=0, padx=10, pady=(0,10), sticky="ns") 
         leftframe_bottom.grid_rowconfigure(0,weight=1)
         leftframe_bottom.grid_columnconfigure(0,weight=1)
         leftframe_bottom.grid_columnconfigure(1,weight=1)
         leftframe_bottom.grid_columnconfigure(2,weight=1)
         
-        geninputslabel_frame = ctk.CTkFrame(leftframe)
+        geninputslabel_frame = ctk.CTkFrame(leftframe,fg_color="transparent")
         geninputslabel_frame.grid(row=0,column=0,padx=10,pady=0)
         geninputslabel = ctk.CTkLabel(geninputslabel_frame,text="General Inputs",font=("Courier New Bold", 20))
         geninputslabel.grid(row=0,column=0,padx=10,pady=10,sticky="ns")
-        
-        # combustionlabel_frame = ctk.CTkFrame(leftframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
-        # combustionlabel_frame.grid(row=2,column=0,padx=0,pady=(0,10))
-        # combustionlabel = ctk.CTkLabel(combustionlabel_frame,text="Combustion Inputs",font=("Courier New Bold", 20))
-        # combustionlabel.grid(row=0,column=0,padx=10,pady=10,sticky="ns")
-        
         
         #Right frame will contain the plots for the geometry, temp, pressure, and mach number vs axial distance
         self.rightframe.grid_columnconfigure(0,weight=1)
@@ -81,20 +75,21 @@ class GUI:
         
         #all values with 1 are incomplete. Recheck units as I want to make them base SI instead of weird numbers like in matlab
         input_widgets = [
-            {'label': "Gamma", "value":1.4, "units": ""},
+            {'label': "\u03B3", "value":1.4, "units": ""},
             {'label': "R", "value":287, "units": "J/(kg*K)"},
-            {'label': "Air Density", "value":1.225, "units": "kg/m^3"},
-            {'label': "Exit Velocity", "value":1200, "units": "km/hr"},
+            {'label': "\u03C1 air ", "value":1.225, "units": "kg/m^3"},
             {'label': "Blowout Velocity Parameter", "value":1, "units": ""},
             {'label': "Ignition Time Parameter", "value":1, "units": ""},
-            {'label': "Mass Flow In", "value":1, "units": "L/s"},
-            {'label': "Turbine Blade Length", "value":1, "units": "m"},
-            {'label': "Diffuser Length", "value":1, "units": "m"},
-            {'label': "Straight Section Length", "value":1, "units": "m"},
+            {'label': "\u1E41 in", "value":1, "units": "L/s"},
+            {'label': "\u1E41 fuel", "value":1, "units": "g/min"},
+            {'label': "Exit Velocity", "value":1200, "units": "km/hr"},
+            {'label': "Turbine Blade Length", "value":1, "units": "mm"},
+            {'label': "Diffuser Length", "value":1, "units": "mm"},
+            {'label': "Straight Section Length", "value":1, "units": "mm"},
             {'label': "Flame Holder Half Angle", "value":15, "units": "degrees"},
             {'label': "Nozzle Diameter", "value":1, "units": "mm"},
             {'label': "Turbine Diameter", "value":1, "units": "mm"},
-            {'label': "Mass Flow Fuel", "value":1, "units": "g/min"},
+            
             # {'label': "Blank", "value":1, "units": "Blank"},    #3 placeholders for now, might not need?
             # {'label': "Blank", "value":1, "units": "Blank"},
             # {'label': "Blank", "value":1, "units": "Blank"},
@@ -124,45 +119,36 @@ class GUI:
         resetbutton.grid(row=0,column=2,padx=10,pady=10,sticky="nsew")
         
         #combustion inputs frame. Not sure how I want to organize this entirely yet
-        combframe = ctk.CTkFrame(leftframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        combframe = ctk.CTkFrame(leftframe)
         combframe.grid(row=3,column=0, padx=10, pady=10, sticky="new")
+        combframe.grid_columnconfigure(0, weight=1)
         combustionlabel = ctk.CTkLabel(combframe, text="Combustion Inputs", font=("Courier New Bold", 20))
         combustionlabel.grid(row=0, column=0, padx=10, pady=10, sticky="n")
         
-        combframetop = ctk.CTkFrame(combframe)
-        combframetop.grid(row=1, column=0, padx=10, pady=(0,10), sticky="ew")
-        combframemiddle = ctk.CTkFrame(combframe)
-        combframemiddle.grid(row=2, column=0, padx=10, pady=(0,10), sticky="ew")
-        combframemiddle.grid_columnconfigure(0,weight=1)
+        combframetop = ctk.CTkFrame(combframe,fg_color="transparent")
+        combframetop.grid(row=1, column=0, padx=10, pady=(0,10))
+        combframemiddle = ctk.CTkFrame(combframe,fg_color="transparent")
+        combframemiddle.grid(row=2, column=0, padx=10, pady=(0,10))
         
         fuel_label = ctk.CTkLabel(combframetop,text='Fuel Type',font=("Computer Modern", 15))
         fuel_label.grid(row=0,column=0,padx=10,pady=10,sticky="w")
-        self.fueldropdown = ctk.CTkOptionMenu(combframetop, values=["Jet-A","Propane","Butane","Methane"],command=self.update_combustion_equation,font=('Computer Modern',15)) #TODO: Finish later
+        self.fueldropdown = ctk.CTkOptionMenu(combframetop, values=["Jet-A","Propane","Butane","Methane"],command=self.update_combustion_equation,font=('Computer Modern',15)) #TODO: Finish later (want to change the colors later too)
         self.fueldropdown.grid(row=0,column=1,padx=10,pady=10)
         self.dissociation_checkbox = ctk.CTkCheckBox(combframetop,text="Dissociation",command=self.update_equation_values,font=('Computer Modern',15)) #TODO: Finish later
         self.dissociation_checkbox.grid(row=0,column=2,padx=10,pady=10,sticky="e")
         
-        combframeinputs = ctk.CTkFrame(combframemiddle,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        combframeinputs = ctk.CTkFrame(combframemiddle,fg_color="transparent")
         combframeinputs.grid(row=0,column=0,padx=10,pady=(0,10),sticky="nsew")
         combframeinputs.grid_rowconfigure(0,weight=1)
-        for i in range(19):
-            if i%2 == 1:
-                combframeinputs.grid_columnconfigure(i, weight=2)
-            else:
-                combframeinputs.grid_columnconfigure(i,weight=1)
+        
         self.create_combustion_inputs(combframeinputs)
         
-        combframebottom = ctk.CTkFrame(combframe,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
-        combframebottom.grid(row=3,column=0,padx=10,pady=(0,10),sticky="ns")
-        for i in range(6):
-            if i%2==1:
-                combframebottom.grid_columnconfigure(i, weight=1)
-            else:
-                combframebottom.grid_columnconfigure(i, weight=1)
+        combframebottom = ctk.CTkFrame(combframe,fg_color="transparent")
+        combframebottom.grid(row=3,column=0,padx=10,pady=(0,10))
         
         combustion_bottom_widgets = [
-            {'label': "Exhaust Gas Temperature", "value": 1073.15, "units": "K"},
-            {'label': "Exit Pressure", "value": 101325, "units": "Pa"},
+            {'label': "EGT", "value": 1073.15, "units": "K"},
+            {'label': "Combustion Pressure", "value": 101325, "units": "Pa"},
         ]
         
         widget_instances_bottom = []
@@ -172,39 +158,49 @@ class GUI:
             widget.grid(row=0, column=col)
             widget_instances_bottom.append(widget)
         
-        
-            
-
         #Plot stuff
         self.setup_plots(self.rightframe)
         
-        self.output_label_frame = ctk.CTkFrame(leftframe, border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
-        self.output_label_frame.grid(row=4,column=0,padx=10,pady=(0,10),sticky="nsew")
-        self.output_label = ctk.CTkLabel(self.output_label_frame, text="Outputs", font=("Computer Modern",20))
-        self.output_label.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
-        
-        self.output_frame = ctk.CTkFrame(leftframe, border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
+        self.output_frame = ctk.CTkFrame(leftframe,fg_color="transparent")
         self.output_frame.grid(row=5,column=0,padx=10,pady=(0,10),sticky="nsew")
+        self.output_frame.grid_rowconfigure(0,weight=1)
+        
+        
+        self.output_label = ctk.CTkLabel(self.output_frame, text="Outputs", font=("Courier New Bold",25))
+        self.output_label.grid(row=0,column=0,columnspan=6,padx=10,pady=10,sticky="ew")
+        
         
         output_widgets = [
-            {'label': "Thrust Increase", "value": 0, "units": "N"},
-            {'label': "Combustion Temperature", "value": 0, "units": "K"},
-            {'label': "Combustion Pressure", "value": 0, "units": "Pa"},
-            {'label': "Exit Mach Number", "value": 0, "units": ""},
-            {'label': "\u03A6", "value": 0, "units": ""},
-            {'label': "𝑓 act", "value": 0, "units": ""},
-            {'label': "𝑓 stoich", "value": 0, "units": ""},
+            {'label': "Thrust Increase", "value": 1, "units": "N"},
+            {'label': "Combustion Temperature", "value": 1, "units": "K"},
+            {'label': "Combustion Pressure", "value": 1, "units": "Pa"},
+            {'label': "Exit Mach Number", "value": 1, "units": ""},
+            {'label': "\u03A6", "value": 1, "units": ""},
+            {'label': "𝑓 act", "value": 1, "units": ""},
+            {'label': "𝑓 stoich", "value": 1, "units": ""},
         ]
         widget_instances_output = []
+        inputs_per_column_output = 4
         for i, out in enumerate(output_widgets):
-            col = i % 2
-            row = i // 2
-            widget = MainInputsWidget(self.output_frame, value=str(out["value"]), label_front=out["label"], label_rear=out["units"])
-            widget.grid(row=row, column=col)
-            widget_instances_output.append(widget)
+            col = i // inputs_per_column_output
+            row = (i % inputs_per_column_output) + 1  # +1 to start below the label
+            grid_col = col * 3  # Each widget takes 3 columns (label, space, input)
+            widget_output = MainInputsWidget(self.output_frame, value=str(out["value"]), label_front=out["label"], label_rear=out["units"])
+            widget_output.grid(row=row, column=grid_col)
+            widget_instances_output.append(widget_output)
+
+        num_output_col = ((len(output_widgets) + inputs_per_column_output - 1) // inputs_per_column_output) * 3
+        for c in range(num_output_col):
+            if c % 3 == 1:  # Middle columns (spacing)
+                self.output_frame.grid_columnconfigure(c, weight=1)
+            else:  # Label and input columns
+                self.output_frame.grid_columnconfigure(c, weight=0)
+
+
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close) #handles closing the window properly
         self.root.mainloop() #runs the main loop
+    
     def setup_plots(self, frame):
         frame.grid_rowconfigure(0,weight=1) #was going to make the geometry plot larger but looks bad
         frame.grid_rowconfigure(1,weight=1)
