@@ -1,18 +1,20 @@
 import customtkinter as ctk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from PIL import Image, ImageTk
+# from PIL import Image, ImageTk #might throw in the MW logo later somewhere along with some easter eggs ;)
 from MainInputsWidget.main_inputs_widget import MainInputsWidget
+from MainCalculations.main_calculations import MainCalculations
 
 
 class GUI:
     def __init__(self):
         self.main_window()
+        self.ignition = MainCalculations()  # make an instance of the MainCalculations class
         # self.running = True #want to implement a start and stop button
         
     def main_window(self):
         self.root = ctk.CTk()   #create main window
-        self.root.title("Ignition")     #name of the window
+        self.root.title("Ignition v0.1")     #name of the window
         ctk.set_appearance_mode("dark") #set default theme to dark. Will add ability to change later
         self.root._state_before_windows_set_titlebar_color = 'zoomed' #fullscreen the window
         
@@ -95,14 +97,14 @@ class GUI:
             # {'label': "Blank", "value":1, "units": "Blank"},
         ]
         inputs_per_column = 7
-        widget_instances = []
+        self.widget_instances = []
         for i, inp in  enumerate(input_widgets):
             col = i // inputs_per_column
             row = i % inputs_per_column
             grid_col = col*3
             widget = MainInputsWidget(inputsframe, value=str(inp["value"]),label_front=inp["label"], label_rear=inp["units"])
             widget.grid(row = row,column=grid_col)
-            widget_instances.append(widget)
+            self.widget_instances.append(widget)
         
         num_input_col = ((len(input_widgets) + inputs_per_column - 1) // inputs_per_column) * 3
         for c in range(num_input_col):
@@ -111,7 +113,7 @@ class GUI:
             else:
                 inputsframe.grid_columnconfigure(c, weight=0)
 
-        startbutton = ctk.CTkButton(leftframe_bottom,text="Start",command=None) #implement start function later
+        startbutton = ctk.CTkButton(leftframe_bottom,text="Start",command=self.run_ignition) #implement start function later
         startbutton.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
         stopbutton = ctk.CTkButton(leftframe_bottom,text="Stop",command=None) #implement stop function later
         stopbutton.grid(row=0,column=1,padx=10,pady=10,sticky="nsew")
@@ -151,12 +153,12 @@ class GUI:
             {'label': "Combustion Pressure", "value": 101325, "units": "Pa"},
         ]
         
-        widget_instances_bottom = []
+        self.widget_instances_bottom = []
         for i, inp in enumerate(combustion_bottom_widgets):
             col = i * 3
             widget = MainInputsWidget(combframebottom, value=str(inp["value"]), label_front=inp["label"], label_rear=inp["units"])
             widget.grid(row=0, column=col)
-            widget_instances_bottom.append(widget)
+            self.widget_instances_bottom.append(widget)
         
         #Plot stuff
         self.setup_plots(self.rightframe)
@@ -179,7 +181,7 @@ class GUI:
             {'label': "𝑓 act", "value": 1, "units": ""},
             {'label': "𝑓 stoich", "value": 1, "units": ""},
         ]
-        widget_instances_output = []
+        self.widget_instances_output = []
         inputs_per_column_output = 4
         for i, out in enumerate(output_widgets):
             col = i // inputs_per_column_output
@@ -187,8 +189,8 @@ class GUI:
             grid_col = col * 3  # Each widget takes 3 columns (label, space, input)
             widget_output = MainInputsWidget(self.output_frame, value=str(out["value"]), label_front=out["label"], label_rear=out["units"])
             widget_output.grid(row=row, column=grid_col)
-            widget_instances_output.append(widget_output)
-
+            self.widget_instances_output.append(widget_output)
+        
         num_output_col = ((len(output_widgets) + inputs_per_column_output - 1) // inputs_per_column_output) * 3
         for c in range(num_output_col):
             if c % 3 == 1:  # Middle columns (spacing)
@@ -196,7 +198,7 @@ class GUI:
             else:  # Label and input columns
                 self.output_frame.grid_columnconfigure(c, weight=0)
 
-
+    
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close) #handles closing the window properly
         self.root.mainloop() #runs the main loop
@@ -437,3 +439,42 @@ class GUI:
         if hasattr(self, 'dissociation_checkbox'):
             self.update_equation_values()
 
+    def run_ignition(self):
+        gamma = float(self.widget_instances[0].get_value())
+        R = float(self.widget_instances[1].get_value())
+        rho_air = float(self.widget_instances[2].get_value())
+        bv_param = float(self.widget_instances[3].get_value())
+        it_param = float(self.widget_instances[4].get_value())
+        mdot_in = float(self.widget_instances[5].get_value())
+        mdot_fuel = float(self.widget_instances[6].get_value())
+        exit_velocity = float(self.widget_instances[7].get_value())
+        turb_blade_len = float(self.widget_instances[8].get_value())
+        diff_length = float(self.widget_instances[9].get_value())
+        straight_length = float(self.widget_instances[10].get_value())
+        theta = float(self.widget_instances[11].get_value())
+        noz_d = float(self.widget_instances[12].get_value())
+        turb_d = float(self.widget_instances[13].get_value())
+        
+        egt = float(self.widget_instances_bottom[0].get_value())
+        input_pressure = float(self.widget_instances_bottom[1].get_value())
+        
+        fuel_type = str(self.fueldropdown.get())
+        dissociation_checkbox_value = self.dissociation_checkbox.get()
+        #add in the combustion equation stuff later. Not sure how to handle yet
+        comb_temp = float(self.widget_instances_bottom[0].get_value())
+        comb_pressure = float(self.widget_instances_bottom[1].get_value())
+        D = 2 #flame holder height (optimize to find this??)
+
+        runignition = self.ignition.main_calculations(gamma, R, rho_air, egt, exit_velocity, bv_param, it_param, turb_blade_len,
+                                                      diff_length, straight_length, theta, D, noz_d, turb_d, mdot_in, mdot_fuel)
+        
+        self.widget_instances_output[0].set_value(runignition['thrust'])
+        self.widget_instances_output[1].set_value(runignition['Tpost'])
+        self.widget_instances_output[2].set_value(runignition['Ppost'])
+        self.widget_instances_output[3].set_value(runignition['Mexit'])
+        self.widget_instances_output[4].set_value(runignition['phi'])
+        self.widget_instances_output[5].set_value(runignition['f_act'])
+        self.widget_instances_output[6].set_value(runignition['f_stoich'])
+        
+        
+            

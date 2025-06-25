@@ -11,5 +11,9 @@ class MainInputsWidget:
         self.entry.grid(row=row,column=column+1, padx=padx,pady=pady, sticky=sticky)
         self.label_rear.grid(row=row,column=column+2, padx=padx,pady=pady, sticky='w')
         
-    def get(self):
+    def get_value(self):
        return self.entry.get() 
+
+    def set_value(self, value):
+        self.entry.delete(0, ctk.END)
+        self.entry.insert(0, value)
