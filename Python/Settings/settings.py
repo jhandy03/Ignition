@@ -1,4 +1,4 @@
-  
+import customtkinter as ctk
 class Settings:
     def plotcolors(self):
         #TODO: implement once GUI is setup
@@ -12,6 +12,10 @@ class Settings:
     def fontsize(self):
         #TODO: implement once GUI is setup
         return
+    
+    def logging(self):
+        logging = ctk.CTkTextbox(self)
+        pass
     
     #TODO: want to implement a large text box that will log internal checks
     # things like 'started calc' 'finished calc', 'started optimization', 'finished optimization'

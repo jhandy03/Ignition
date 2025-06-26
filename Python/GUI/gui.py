@@ -11,6 +11,7 @@ class GUI:
     def __init__(self):
         self.ignition = MainCalculations()  # make an instance of the MainCalculations class
         self.main_window()
+        
         # self.running = True #want to implement a start and stop button
         
     def main_window(self):
@@ -32,11 +33,11 @@ class GUI:
         tabs.add("Unit Conversion Toolbox")
         tabs.add("Settings")
         maintab = tabs.tab("Main")
-        settingstab = tabs.tab("Settings")  #may add more later
+        self.settingstab = tabs.tab("Settings")  #may add more later
+        self.ucttab = tabs.tab("Unit Conversion Toolbox")
+        self.settings_window()
+        self.uct_window()
         
-        settings_frame1 = ctk.CTkFrame(settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
-        set_plotlabel = ctk.CTkLabel(settings_frame1,text='Plot Color',font=("Courier New Bold", 25))
-        set_plotlabel.pack(padx=10, pady=10, anchor="w")
 
         #Breaks the main window into frames and sets their weights
         leftframe = ctk.CTkFrame(maintab,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
@@ -489,3 +490,106 @@ class GUI:
             self.startbutton.configure(state='normal', text='Start')
             self.root.configure(cursor='')
 
+    def settings_window(self):
+        for i in range(2):
+            self.settingstab.grid_rowconfigure(i, weight=1)
+        for i in range(2):
+            self.settingstab.grid_columnconfigure(i, weight=1)
+        
+        theme_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
+        theme_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+ 
+        plot_colors_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
+        plot_colors_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        
+        internal_log_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
+        internal_log_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+        
+        font_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
+        font_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+        
+    def uct_window(self):
+        for i in range(9):
+            self.ucttab.grid_rowconfigure(i, weight=1)
+            
+        self.ucttab.grid_columnconfigure(0, weight=1)
+        self.ucttab.grid_columnconfigure(1, weight=2)
+        self.ucttab.grid_columnconfigure(2, weight=2)
+        self.ucttab.grid_columnconfigure(3, weight=2)
+        self.ucttab.grid_columnconfigure(4, weight=2)
+        self.ucttab.grid_columnconfigure(5, weight=2)
+
+            
+        
+        title_label = ctk.CTkLabel(self.ucttab, text="Unit Conversion Toolbox", font=("Courier New Bold", 50))
+        title_label.grid(row=0, column=0, columnspan=6, padx=10, pady=10, sticky="ns")
+        
+        inputs_label = ctk.CTkLabel(self.ucttab, text="Input Units", font=("Computer Modern", 25))
+        inputs_label.grid(row=1, column=2, padx=10, pady=10, sticky="nsew")
+
+        outputs_label = ctk.CTkLabel(self.ucttab, text="Output Units", font=("Computer Modern", 25))
+        outputs_label.grid(row=1, column=4, padx=10, pady=10, sticky="nsew")
+        
+        unit_labels = ['Temperature','Pressure','Velocity','Volume','Mass Flow Rate','Volume Flow Rate','Mass to Volume Flow Rate']
+            
+        for i, input in enumerate(unit_labels):
+            conversion_label = ctk.CTkLabel(self.ucttab, text=input, font=("Computer Modern", 20))
+            conversion_label.grid(row=i+2, column=0, padx=10, pady=10, sticky="ns")
+            
+        input_entries=[]
+        for i in range(7):
+            entry = ctk.CTkEntry(self.ucttab, width=20)
+            entry.grid(row=i+2, column=1, padx=10, pady=10, sticky="ew")
+            input_entries.append(entry)
+            
+        input_temp_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["Celsius", "Fahrenheit", "Kelvin"], command=None, font=("Computer Modern", 15))
+        input_temp_dropdown.grid(row=2, column=2, padx=10, pady=10, sticky='ew')
+
+        input_pressure_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["Pa", "kPa", "MPa", "atm", "psi"], command=None, font=("Computer Modern", 15))
+        input_pressure_dropdown.grid(row=3, column=2, padx=10, pady=10, sticky="ew")
+
+        input_velocity_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m/s", "km/h", "mph"], command=None, font=("Computer Modern", 15))
+        input_velocity_dropdown.grid(row=4, column=2, padx=10, pady=10, sticky="ew")
+
+        input_volume_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3", "L", "cm^3"], command=None, font=("Computer Modern", 15))
+        input_volume_dropdown.grid(row=5, column=2, padx=10, pady=10, sticky="ew")
+
+        input_mfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "g/s", "lb/s"], command=None, font=("Computer Modern", 15))
+        input_mfr_dropdown.grid(row=6, column=2, padx=10, pady=10, sticky="ew")
+
+        input_vfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3/s", "L/s", "cm^3/s"], command=None, font=("Computer Modern", 15))
+        input_vfr_dropdown.grid(row=7, column=2, padx=10, pady=10, sticky="ew")
+
+        input_mtvfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "g/s", "lb/s"], command=None, font=("Computer Modern", 15))
+        input_mtvfr_dropdown.grid(row=8, column=2, padx=10, pady=10, sticky="ew")
+
+        for i in range(7):
+            arrows_label = ctk.CTkLabel(self.ucttab, text="→", font=("Computer Modern", 50))
+            arrows_label.grid(row=i+2, column=3, padx=10, pady=10, sticky="nsew")
+            
+        output_temp_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["Celsius", "Fahrenheit", "Kelvin"], command=None, font=("Computer Modern", 15))
+        output_temp_dropdown.grid(row=2, column=4, padx=10, pady=10, sticky='ew')
+
+        output_pressure_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["Pa", "kPa", "MPa", "atm", "psi"], command=None, font=("Computer Modern", 15))
+        output_pressure_dropdown.grid(row=3, column=4, padx=10, pady=10, sticky='ew')
+
+        output_velocity_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m/s", "km/h", "mph"], command=None, font=("Computer Modern", 15))
+        output_velocity_dropdown.grid(row=4, column=4, padx=10, pady=10, sticky='ew')
+
+        output_volume_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3", "L", "cm^3"], command=None, font=("Computer Modern", 15))
+        output_volume_dropdown.grid(row=5, column=4, padx=10, pady=10, sticky='ew')
+
+        output_mfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "g/s", "lb/s"], command=None, font=("Computer Modern", 15))
+        output_mfr_dropdown.grid(row=6, column=4, padx=10, pady=10, sticky='ew')
+
+        output_vfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3/s", "L/s", "cm^3/s"], command=None, font=("Computer Modern", 15))
+        output_vfr_dropdown.grid(row=7, column=4, padx=10, pady=10, sticky='ew')
+
+        output_mtvfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "g/s", "lb/s"], command=None, font=("Computer Modern", 15))
+        output_mtvfr_dropdown.grid(row=8, column=4, padx=10, pady=10, sticky='ew')
+        
+        output_entries = []
+        for i in range(7):
+            entry = ctk.CTkEntry(self.ucttab, width=20)
+            entry.grid(row=i+2, column=5, padx=10, pady=10, sticky="ew")
+            output_entries.append(entry)
