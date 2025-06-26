@@ -4,19 +4,26 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # from PIL import Image, ImageTk #might throw in the MW logo later somewhere along with some easter eggs ;)
 from MainInputsWidget.main_inputs_widget import MainInputsWidget
 from MainCalculations.main_calculations import MainCalculations
+import random as rand
 
 
 class GUI:
     def __init__(self):
-        self.main_window()
         self.ignition = MainCalculations()  # make an instance of the MainCalculations class
+        self.main_window()
         # self.running = True #want to implement a start and stop button
         
     def main_window(self):
         self.root = ctk.CTk()   #create main window
-        self.root.title("Ignition v0.1")     #name of the window
+        self.root.title("Ignition v0.5")     #name of the window
         ctk.set_appearance_mode("dark") #set default theme to dark. Will add ability to change later
         self.root._state_before_windows_set_titlebar_color = 'zoomed' #fullscreen the window
+        
+        rand_num = rand.randint(0, 100)
+        if rand_num >=  95:
+            self.root.configure(cursor='right_ptr')
+        else:
+            pass
         
         #Creates the mains tabs of Ignition and then assigns them to variables. Makes things easier to type later
         tabs = ctk.CTkTabview(self.root, width=300, height=300, anchor="w",border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b") #anchor='w' make them left aligned
@@ -113,12 +120,12 @@ class GUI:
             else:
                 inputsframe.grid_columnconfigure(c, weight=0)
 
-        startbutton = ctk.CTkButton(leftframe_bottom,text="Start",command=self.run_ignition) #implement start function later
-        startbutton.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
-        stopbutton = ctk.CTkButton(leftframe_bottom,text="Stop",command=None) #implement stop function later
-        stopbutton.grid(row=0,column=1,padx=10,pady=10,sticky="nsew")
-        resetbutton = ctk.CTkButton(leftframe_bottom,text="Reset",command=None) #implement reset function later
-        resetbutton.grid(row=0,column=2,padx=10,pady=10,sticky="nsew")
+        self.startbutton = ctk.CTkButton(leftframe_bottom,text="Start",command=self.run_ignition) #implement start function later
+        self.startbutton.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
+        self.stopbutton = ctk.CTkButton(leftframe_bottom,text="Stop",command=None) #implement stop function later
+        self.stopbutton.grid(row=0,column=1,padx=10,pady=10,sticky="nsew")
+        self.resetbutton = ctk.CTkButton(leftframe_bottom,text="Reset",command=None) #implement reset function later
+        self.resetbutton.grid(row=0,column=2,padx=10,pady=10,sticky="nsew")
         
         #combustion inputs frame. Not sure how I want to organize this entirely yet
         combframe = ctk.CTkFrame(leftframe)
@@ -440,41 +447,45 @@ class GUI:
             self.update_equation_values()
 
     def run_ignition(self):
-        gamma = float(self.widget_instances[0].get_value())
-        R = float(self.widget_instances[1].get_value())
-        rho_air = float(self.widget_instances[2].get_value())
-        bv_param = float(self.widget_instances[3].get_value())
-        it_param = float(self.widget_instances[4].get_value())
-        mdot_in = float(self.widget_instances[5].get_value())
-        mdot_fuel = float(self.widget_instances[6].get_value())
-        exit_velocity = float(self.widget_instances[7].get_value())
-        turb_blade_len = float(self.widget_instances[8].get_value())
-        diff_length = float(self.widget_instances[9].get_value())
-        straight_length = float(self.widget_instances[10].get_value())
-        theta = float(self.widget_instances[11].get_value())
-        noz_d = float(self.widget_instances[12].get_value())
-        turb_d = float(self.widget_instances[13].get_value())
-        
-        egt = float(self.widget_instances_bottom[0].get_value())
-        input_pressure = float(self.widget_instances_bottom[1].get_value())
-        
-        fuel_type = str(self.fueldropdown.get())
-        dissociation_checkbox_value = self.dissociation_checkbox.get()
-        #add in the combustion equation stuff later. Not sure how to handle yet
-        comb_temp = float(self.widget_instances_bottom[0].get_value())
-        comb_pressure = float(self.widget_instances_bottom[1].get_value())
-        D = 2 #flame holder height (optimize to find this??)
-
-        runignition = self.ignition.main_calculations(gamma, R, rho_air, egt, exit_velocity, bv_param, it_param, turb_blade_len,
-                                                      diff_length, straight_length, theta, D, noz_d, turb_d, mdot_in, mdot_fuel)
-        
-        self.widget_instances_output[0].set_value(runignition['thrust'])
-        self.widget_instances_output[1].set_value(runignition['Tpost'])
-        self.widget_instances_output[2].set_value(runignition['Ppost'])
-        self.widget_instances_output[3].set_value(runignition['Mexit'])
-        self.widget_instances_output[4].set_value(runignition['phi'])
-        self.widget_instances_output[5].set_value(runignition['f_act'])
-        self.widget_instances_output[6].set_value(runignition['f_stoich'])
-        
-        
+        self.startbutton.configure(state='disabled',text='Processing...')
+        self.root.update()
+        try:
+            gamma = float(self.widget_instances[0].get_value())
+            R = float(self.widget_instances[1].get_value())
+            rho_air = float(self.widget_instances[2].get_value())
+            bv_param = float(self.widget_instances[3].get_value())
+            it_param = float(self.widget_instances[4].get_value())
+            mdot_in = float(self.widget_instances[5].get_value())
+            mdot_fuel = float(self.widget_instances[6].get_value())
+            exit_velocity = float(self.widget_instances[7].get_value())
+            turb_blade_len = float(self.widget_instances[8].get_value())
+            diff_length = float(self.widget_instances[9].get_value())
+            straight_length = float(self.widget_instances[10].get_value())
+            theta = float(self.widget_instances[11].get_value())
+            noz_d = float(self.widget_instances[12].get_value())
+            turb_d = float(self.widget_instances[13].get_value())
             
+            egt = float(self.widget_instances_bottom[0].get_value())
+            input_pressure = float(self.widget_instances_bottom[1].get_value())
+            
+            fuel_type = str(self.fueldropdown.get())
+            dissociation_checkbox_value = self.dissociation_checkbox.get()
+            #add in the combustion equation stuff later. Not sure how to handle yet
+            comb_temp = float(self.widget_instances_bottom[0].get_value())
+            comb_pressure = float(self.widget_instances_bottom[1].get_value())
+            D = 2 #flame holder height (optimize to find this??)
+
+            runignition = self.ignition.main_calculations(gamma, R, rho_air, egt, exit_velocity, bv_param, it_param, turb_blade_len,
+                                                        diff_length, straight_length, theta, D, noz_d, turb_d, mdot_in, mdot_fuel)
+
+            self.widget_instances_output[0].set_value(str(runignition['thrust']))
+            self.widget_instances_output[1].set_value(str(runignition['Tpost']))
+            self.widget_instances_output[2].set_value(str(runignition['Ppost']))
+            self.widget_instances_output[3].set_value(str(runignition['Mexit']))
+            self.widget_instances_output[4].set_value(str(runignition['phi']))
+            self.widget_instances_output[5].set_value(str(runignition['f_act']))
+            self.widget_instances_output[6].set_value(str(runignition['f_stoich']))
+        finally:
+            self.startbutton.configure(state='normal', text='Start')
+            self.root.configure(cursor='')
+
