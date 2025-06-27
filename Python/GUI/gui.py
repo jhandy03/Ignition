@@ -4,12 +4,14 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # from PIL import Image, ImageTk #might throw in the MW logo later somewhere along with some easter eggs ;)
 from MainInputsWidget.main_inputs_widget import MainInputsWidget
 from MainCalculations.main_calculations import MainCalculations
+from UnitConversionToolbox.unit_conversion_toolbox import UnitConversionToolbox
 import random as rand
 
 
 class GUI:
     def __init__(self):
         self.ignition = MainCalculations()  # make an instance of the MainCalculations class
+        self.uct = UnitConversionToolbox()  # Create instance of unit conversion class
         self.main_window()
         
         # self.running = True #want to implement a start and stop button
@@ -123,6 +125,7 @@ class GUI:
 
         self.startbutton = ctk.CTkButton(leftframe_bottom,text="Start",command=self.run_ignition) #implement start function later
         self.startbutton.grid(row=0,column=0,padx=10,pady=10,sticky="nsew")
+        self.startbutton.bind('<Return>', lambda event: self.run_ignition())
         self.stopbutton = ctk.CTkButton(leftframe_bottom,text="Stop",command=None) #implement stop function later
         self.stopbutton.grid(row=0,column=1,padx=10,pady=10,sticky="nsew")
         self.resetbutton = ctk.CTkButton(leftframe_bottom,text="Reset",command=None) #implement reset function later
@@ -536,60 +539,117 @@ class GUI:
             conversion_label = ctk.CTkLabel(self.ucttab, text=input, font=("Computer Modern", 20))
             conversion_label.grid(row=i+2, column=0, padx=10, pady=10, sticky="ns")
             
-        input_entries=[]
+        self.input_entries=[]
         for i in range(7):
             entry = ctk.CTkEntry(self.ucttab, width=20)
             entry.grid(row=i+2, column=1, padx=10, pady=10, sticky="ew")
-            input_entries.append(entry)
-            
-        input_temp_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["Celsius", "Fahrenheit", "Kelvin"], command=None, font=("Computer Modern", 15))
-        input_temp_dropdown.grid(row=2, column=2, padx=10, pady=10, sticky='ew')
+            entry.bind('<KeyRelease>', self.conversion_callback(i))  # Bind key release to conversion
+            self.input_entries.append(entry)
 
-        input_pressure_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["Pa", "kPa", "MPa", "atm", "psi"], command=None, font=("Computer Modern", 15))
-        input_pressure_dropdown.grid(row=3, column=2, padx=10, pady=10, sticky="ew")
+        self.input_temp_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["Celsius", "Fahrenheit", "Kelvin"], command=lambda x: self.convert_units(0), font=("Computer Modern", 15))
+        self.input_temp_dropdown.grid(row=2, column=2, padx=10, pady=10, sticky='ew')
 
-        input_velocity_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m/s", "km/h", "mph"], command=None, font=("Computer Modern", 15))
-        input_velocity_dropdown.grid(row=4, column=2, padx=10, pady=10, sticky="ew")
+        self.input_pressure_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["bar", "atm", "Pa"], command=lambda x: self.convert_units(1), font=("Computer Modern", 15))
+        self.input_pressure_dropdown.grid(row=3, column=2, padx=10, pady=10, sticky="ew")
 
-        input_volume_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3", "L", "cm^3"], command=None, font=("Computer Modern", 15))
-        input_volume_dropdown.grid(row=5, column=2, padx=10, pady=10, sticky="ew")
+        self.input_velocity_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m/s", "km/hr", "mph"], command=lambda x: self.convert_units(2), font=("Computer Modern", 15))
+        self.input_velocity_dropdown.grid(row=4, column=2, padx=10, pady=10, sticky="ew")
 
-        input_mfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "g/s", "lb/s"], command=None, font=("Computer Modern", 15))
-        input_mfr_dropdown.grid(row=6, column=2, padx=10, pady=10, sticky="ew")
+        self.input_volume_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3", "cm^3", "L"], command=lambda x: self.convert_units(3), font=("Computer Modern", 15))
+        self.input_volume_dropdown.grid(row=5, column=2, padx=10, pady=10, sticky="ew")
 
-        input_vfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3/s", "L/s", "cm^3/s"], command=None, font=("Computer Modern", 15))
-        input_vfr_dropdown.grid(row=7, column=2, padx=10, pady=10, sticky="ew")
+        self.input_mfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "g/min", "kg/min"], command=lambda x: self.convert_units(4), font=("Computer Modern", 15))
+        self.input_mfr_dropdown.grid(row=6, column=2, padx=10, pady=10, sticky="ew")
 
-        input_mtvfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "g/s", "lb/s"], command=None, font=("Computer Modern", 15))
-        input_mtvfr_dropdown.grid(row=8, column=2, padx=10, pady=10, sticky="ew")
+        self.input_vfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3/s", "L/s", "m^3/min","L/min"], command=lambda x: self.convert_units(5), font=("Computer Modern", 15))
+        self.input_vfr_dropdown.grid(row=7, column=2, padx=10, pady=10, sticky="ew")
+
+        self.input_mtvfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "m^3/s"], command=lambda x: self.convert_units(6), font=("Computer Modern", 15))
+        self.input_mtvfr_dropdown.grid(row=8, column=2, padx=10, pady=10, sticky="ew")
 
         for i in range(7):
             arrows_label = ctk.CTkLabel(self.ucttab, text="→", font=("Computer Modern", 50))
             arrows_label.grid(row=i+2, column=3, padx=10, pady=10, sticky="nsew")
-            
-        output_temp_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["Celsius", "Fahrenheit", "Kelvin"], command=None, font=("Computer Modern", 15))
-        output_temp_dropdown.grid(row=2, column=4, padx=10, pady=10, sticky='ew')
 
-        output_pressure_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["Pa", "kPa", "MPa", "atm", "psi"], command=None, font=("Computer Modern", 15))
-        output_pressure_dropdown.grid(row=3, column=4, padx=10, pady=10, sticky='ew')
+        self.output_temp_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["Celsius", "Fahrenheit", "Kelvin"], command=lambda x: self.convert_units(0), font=("Computer Modern", 15))
+        self.output_temp_dropdown.grid(row=2, column=4, padx=10, pady=10, sticky='ew')
 
-        output_velocity_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m/s", "km/h", "mph"], command=None, font=("Computer Modern", 15))
-        output_velocity_dropdown.grid(row=4, column=4, padx=10, pady=10, sticky='ew')
+        self.output_pressure_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["bar", "atm", "Pa"], command=lambda x: self.convert_units(1), font=("Computer Modern", 15))
+        self.output_pressure_dropdown.grid(row=3, column=4, padx=10, pady=10, sticky='ew')
 
-        output_volume_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3", "L", "cm^3"], command=None, font=("Computer Modern", 15))
-        output_volume_dropdown.grid(row=5, column=4, padx=10, pady=10, sticky='ew')
+        self.output_velocity_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m/s", "km/hr", "mph"], command=lambda x: self.convert_units(2), font=("Computer Modern", 15))
+        self.output_velocity_dropdown.grid(row=4, column=4, padx=10, pady=10, sticky='ew')
 
-        output_mfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "g/s", "lb/s"], command=None, font=("Computer Modern", 15))
-        output_mfr_dropdown.grid(row=6, column=4, padx=10, pady=10, sticky='ew')
+        self.output_volume_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3", "cm^3", "L"], command=lambda x: self.convert_units(3), font=("Computer Modern", 15))
+        self.output_volume_dropdown.grid(row=5, column=4, padx=10, pady=10, sticky='ew')
 
-        output_vfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3/s", "L/s", "cm^3/s"], command=None, font=("Computer Modern", 15))
-        output_vfr_dropdown.grid(row=7, column=4, padx=10, pady=10, sticky='ew')
+        self.output_mfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "g/min", "kg/min"], command=lambda x: self.convert_units(4), font=("Computer Modern", 15))
+        self.output_mfr_dropdown.grid(row=6, column=4, padx=10, pady=10, sticky='ew')
 
-        output_mtvfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "g/s", "lb/s"], command=None, font=("Computer Modern", 15))
-        output_mtvfr_dropdown.grid(row=8, column=4, padx=10, pady=10, sticky='ew')
-        
-        output_entries = []
+        self.output_vfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["m^3/s", "L/s", "m^3/min",'L/min'], command=lambda x: self.convert_units(5), font=("Computer Modern", 15))
+        self.output_vfr_dropdown.grid(row=7, column=4, padx=10, pady=10, sticky='ew')
+
+        self.output_mtvfr_dropdown = ctk.CTkOptionMenu(self.ucttab, values=["kg/s", "m^3/s"], command=lambda x: self.convert_units(6), font=("Computer Modern", 15))
+        self.output_mtvfr_dropdown.grid(row=8, column=4, padx=10, pady=10, sticky='ew')
+
+        self.output_entries = []
         for i in range(7):
             entry = ctk.CTkEntry(self.ucttab, width=20)
             entry.grid(row=i+2, column=5, padx=10, pady=10, sticky="ew")
-            output_entries.append(entry)
+            self.output_entries.append(entry)
+
+            
+    def convert_units(self, type):
+        try:
+            input_value = self.input_entries[type].get()
+            if not input_value:
+                self.output_entries[type].delete(0, 'end')  
+                return  
+            input_value = float(input_value)
+            dropdowns = [
+                (self.input_temp_dropdown, self.output_temp_dropdown),
+                (self.input_pressure_dropdown, self.output_pressure_dropdown),
+                (self.input_velocity_dropdown, self.output_velocity_dropdown),
+                (self.input_volume_dropdown, self.output_volume_dropdown),
+                (self.input_mfr_dropdown, self.output_mfr_dropdown),
+                (self.input_vfr_dropdown, self.output_vfr_dropdown),
+                (self.input_mtvfr_dropdown, self.output_mtvfr_dropdown),
+            ]
+            input_unit = dropdowns[type][0].get()
+            output_unit = dropdowns[type][1].get()
+            
+            if input_unit == output_unit:
+                output_value = input_value
+            else:
+                if type == 0:
+                    output_value = self.uct.temp_conversion(input_value, input_unit, output_unit)
+                elif type == 1:
+                    output_value = self.uct.pressure_conversion(input_value, input_unit, output_unit)
+                elif type == 2:
+                    output_value = self.uct.velocity_conversion(input_value, input_unit, output_unit)
+                elif type == 3:
+                    output_value = self.uct.volume_conversion(input_value, input_unit, output_unit)
+                elif type == 4:
+                    output_value = self.uct.massflow_conversion(input_value, input_unit, output_unit)
+                elif type == 5:
+                    output_value = self.uct.volflow_conversion(input_value, input_unit, output_unit)
+                elif type == 6:
+                    output_value = self.uct.mass2vol_conversion(input_value, 1.225, input_unit, output_unit) #TODO: Fix the density
+                else:
+                    output_value = input_value
+            
+            self.output_entries[type].delete(0, 'end')
+            self.output_entries[type].insert(0, f"{output_value:.4f}")
+        
+        except ValueError:
+            self.output_entries[type].delete(0, 'end')
+            print("value error")
+        
+        except Exception as e:
+            self.output_entries[type].delete(0, 'end')
+            print('exception')
+            
+    def conversion_callback(self,index):
+        def callback(event):
+            self.convert_units(index)
+        return callback

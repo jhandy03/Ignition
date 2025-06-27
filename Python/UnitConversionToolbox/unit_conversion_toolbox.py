@@ -12,20 +12,23 @@ class UnitConversionToolbox:
             float: converted value
             None: invalid computation
         """
-        if input_units.upper() == 'C':
+        unit_map = {'Celsius':'C', 'Kelvin': 'K', 'Fahrenheit': 'F'}
+        input_units = unit_map.get(input_units, input_units)
+        output_units = unit_map.get(output_units, output_units)
+        if input_units == 'C':
             K = value+273.15
-        elif input_units.upper() == 'K':
+        elif input_units == 'K':
             K = value
-        elif input_units.upper() == 'F':
+        elif input_units == 'F':
             K = (value-32)*5/9+273.15
         else:
             raise ValueError(f"Internal Error: Unrecognized input unit '{input_units}'")
 
-        if output_units.upper() == 'C':
+        if output_units == 'C':
             return K-273.15
-        elif output_units.upper() == 'F':
+        elif output_units == 'F':
             return (K-273.15)*9/5+32
-        elif output_units.upper() == 'K':
+        elif output_units == 'K':
             return K
         else:
             raise ValueError(f"Internal Error: Unrecognized output unit'{output_units}'")
@@ -50,7 +53,7 @@ class UnitConversionToolbox:
             Pa = value
         else:
             raise ValueError(f"Internal Error: Unrecognized input unit '{input_units}'") 
-            
+            #TDOD: maybe throw in psi?
         if output_units.lower() == 'bar':    
              return Pa/100000
         elif output_units.lower() == 'atm':
@@ -144,7 +147,7 @@ class UnitConversionToolbox:
             kg_per_s = value / 1000 / 60
         else:
             return None
-            
+            #TODO: add in lb/s or something like that?
         # Convert from kg/s to desired output units
         if output_units == 'kg/s':
             return kg_per_s
