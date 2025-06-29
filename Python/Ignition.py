@@ -11,16 +11,11 @@ Written for MachWorks @ Virgnia Tech's Propulsion Subteam
 """
 from GUI.gui import GUI
 from Optimization.optimization_testing import Ignition_Optimization
-from Settings.settings import Settings
-from UnitConversionToolbox.unit_conversion_toolbox import UnitConversionToolbox
+
 from Save.save import Save
     
 if __name__ == "__main__":
-    
-    # ignition = Ignition()
-    # settings = Settings()
     gui = GUI()
-    # uctb = UnitConversionToolbox()
     # optim = Ignition_Optimization()
     # save = Save()
     

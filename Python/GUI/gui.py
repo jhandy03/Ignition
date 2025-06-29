@@ -6,17 +6,24 @@ from MainInputsWidget.main_inputs_widget import MainInputsWidget
 from MainCalculations.main_calculations import MainCalculations
 from UnitConversionToolbox.unit_conversion_toolbox import UnitConversionToolbox
 import random as rand
+from Settings.settings import Settings
+import time
+import datetime
 
 
 class GUI:
     def __init__(self):
         self.ignition = MainCalculations()  # make an instance of the MainCalculations class
         self.uct = UnitConversionToolbox()  # Create instance of unit conversion class
+        self.settings = Settings(self)
         self.main_window()
+        
+        self.start_time_main = time.time()
         
         # self.running = True #want to implement a start and stop button
         
     def main_window(self):
+        self.start_time_main = time.time()
         self.root = ctk.CTk()   #create main window
         self.root.title("Ignition v0.5")     #name of the window
         ctk.set_appearance_mode("dark") #set default theme to dark. Will add ability to change later
@@ -209,8 +216,9 @@ class GUI:
             else:  # Label and input columns
                 self.output_frame.grid_columnconfigure(c, weight=0)
 
-    
-
+        
+        
+        
         self.root.protocol("WM_DELETE_WINDOW", self.on_close) #handles closing the window properly
         self.root.mainloop() #runs the main loop
     
@@ -221,38 +229,66 @@ class GUI:
         self.setup_geometry_plot()
         self.setup_temp_pressure_plot()
         self.setup_mach_plot()
+        self.test_plot()
+        
+        self.figures = [self.geometry_fig, self.temp_fig, self.mach_fig, self.test_fig] #used for theme change
         
     def setup_geometry_plot(self):
-        self.geometry_fig, self.geometry_ax = plt.subplots(figsize=(6,6.5)) #might need to pass in figsize if things are a big off
-        self.geometry_ax.set_title("Afterburner Geometry")
-        self.geometry_ax.set_xlabel("Axial Distance (m)")
-        self.geometry_ax.set_ylabel("Radial Distance (m)")
+         
+        self.geometry_fig, self.geometry_ax = plt.subplots(figsize=(6,6.5),facecolor='#2b2b2b') #might need to pass in figsize if things are a bit off
+        self.geometry_ax.set_title("Afterburner Geometry",color='w')
+        self.geometry_ax.set_xlabel("Axial Distance (m)",color='w')
+        self.geometry_ax.set_ylabel("Radial Distance (m)",color='w')
         self.geometry_canvas = FigureCanvasTkAgg(self.geometry_fig, master=self.rightframe)
         self.geometry_canvas.get_tk_widget().grid(row=0, column=0,padx=10,pady=10, sticky="nsew")
         self.geometry_ax.grid(True, linestyle='--', alpha=0.5) #enables grid w/ 50% opacity
+        self.geometry_ax.plot([0, 2], [0, 2])  # Example plot data
+        self.geometry_ax.set_facecolor("#4b4b4b")
+        self.geometry_ax.tick_params(labelcolor='w')
          
     def setup_temp_pressure_plot(self):
-        self.temp_fig, self.temp_ax = plt.subplots()
-        self.temp_ax.set_title("Temperature and Pressure vs Axial Distance")
+        
+        self.temp_fig, self.temp_ax = plt.subplots(facecolor='#2b2b2b')
+        self.temp_ax.set_title("Temperature and Pressure vs Axial Distance",color='w')
         # self.temp_ax.set_xlabel("Axial Distance (m)") #gets cut off and I can't figure out a way to fit the label on every plot
-        self.temp_ax.set_ylabel("Temperature (K)")
+        self.temp_ax.set_ylabel("Temperature (K)",color='w')
+        self.temp_ax.set_facecolor("#4b4b4b")
         
         self.pressure_ax = self.temp_ax.twinx()
-        self.pressure_ax.set_ylabel("Pressure (Pa)")
+        self.pressure_ax.set_ylabel("Pressure (Pa)",color='w')
+        self.pressure_ax.tick_params(labelcolor='w')
         
         self.tp_canvas = FigureCanvasTkAgg(self.temp_fig, master =self.rightframe)
+        self.tp_canvas.get_tk_widget().configure(highlightthickness=0,bd=0,bg='#2b2b2b')
         self.tp_canvas.get_tk_widget().grid(row=1, column=0,padx=10,pady=10, sticky="nsew")
-        self.temp_ax.grid(True, linestyle='--', alpha=0.5) #enables grid w/ 50% opacity
-        
+        self.temp_ax.grid(True, linestyle='-', alpha=0.5) #enables grid w/ 50% opacity
+        self.temp_ax.tick_params(labelcolor='w')
+           
     def setup_mach_plot(self):
-        self.mach_fig, self.mach_ax = plt.subplots()
-        self.mach_ax.set_title("Mach Number vs Axial Distance")
+        
+        self.mach_fig, self.mach_ax = plt.subplots(facecolor='#2b2b2b')
+        self.mach_ax.set_title("Mach Number vs Axial Distance",color='w')
         # self.mach_ax.set_xlabel("Axial Distance (m)")     #gets cut off and I can't figure out a way to fit the label on every plot
-        self.mach_ax.set_ylabel("Mach Number")
+        self.mach_ax.set_ylabel("Mach Number",color='w')
         self.mach_canvas = FigureCanvasTkAgg(self.mach_fig, master=self.rightframe)
+        self.mach_canvas.get_tk_widget().configure(highlightthickness=0,bd=0,bg='#2b2b2b')
         self.mach_canvas.get_tk_widget().grid(row=2, column=0,padx=10,pady=10, sticky="nsew")
         self.mach_ax.grid(True, linestyle='--', alpha=0.5) #enables grid w/ 50% opacity
-        
+        self.mach_ax.set_facecolor("#4b4b4b")
+        self.mach_ax.tick_params(labelcolor='w')
+
+    def test_plot(self):
+        self.test_fig, self.test_ax = plt.subplots(facecolor='#2b2b2b')
+        self.test_ax.set_title('Test Plot',color='w')
+        self.test_ax.set_xlabel('x-axis',color='w')
+        self.test_ax.set_ylabel('y-axis',color='w')
+        self.test_canvas = FigureCanvasTkAgg(self.test_fig, master=self.example_frame)
+        self.test_canvas.get_tk_widget().configure(highlightthickness=0, bd=0, bg='#2b2b2b')
+        self.test_canvas.get_tk_widget().grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+        self.test_ax.grid(True, linestyle='-', alpha=0.5)
+        self.test_ax.set_facecolor("#4b4b4b")
+        self.test_ax.tick_params(labelcolor='w')
+
     def update_plots(self, geox, geoy, tempx, tempy, pressurex, pressurey, machx, machy):
         self.geometry_ax.clear()
         self.temp_ax.clear()
@@ -499,17 +535,55 @@ class GUI:
         for i in range(2):
             self.settingstab.grid_columnconfigure(i, weight=1)
         
-        theme_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
-        theme_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        set_main_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
+        set_main_frame.grid(row=0, column=0, padx=10, pady=10, sticky="new")
+        
+        set_main_frame.grid_columnconfigure(0, weight=1)
+        set_main_frame.grid_rowconfigure(0, weight=0)
+        set_main_frame.grid_rowconfigure(1, weight=0)
+        set_main_frame.grid_rowconfigure(2, weight=0)
+        set_main_frame.grid_rowconfigure(3, weight=0)
+
+        theme_label = ctk.CTkLabel(set_main_frame, text="Theme", font=("Courier New Bold", 20))
+        theme_label.grid(row=0, column=0, padx=10, pady=10,sticky='nw')
+        theme_dropdown = ctk.CTkOptionMenu(set_main_frame, values=['Dark','Light','System'], command=self.settings.set_theme, font=("Computer Modern", 15))
+        theme_dropdown.grid(row=1,column=0, padx=10, pady=10,sticky='w')
+        
+        plot_color_label = ctk.CTkLabel(set_main_frame, text='Plot Theme',font=('Courier New Bold', 20))
+        plot_color_label.grid(row=2,column=0,padx=10,pady=10,sticky='nw')
  
-        plot_colors_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
-        plot_colors_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        plot_color_options = ['Dark','Light',"Don't"]
+        plot_theme_selection = ctk.CTkOptionMenu(set_main_frame, values=plot_color_options, command=self.settings.plotcolors, font=("Computer Modern", 15))
+        plot_theme_selection.grid(row=3,column=0, padx=10, pady=10,sticky='w')
         
+        self.example_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
+        self.example_frame.grid(row=0, column=1, padx=10, pady=10, sticky="new")
+
+        self.example_frame.grid_columnconfigure(0,weight=1)
+        self.example_frame.grid_rowconfigure(0,weight=1)
+        self.example_frame.grid_rowconfigure(1,weight=1)
+        self.example_frame.grid_rowconfigure(2,weight=1)
+
+        example_title_label = ctk.CTkLabel(self.example_frame, text="Example Title", font=("Courier New Bold", 20))
+        example_title_label.grid(row=0, column=0, padx=10, pady=10, sticky="new")
+        example_text_label = ctk.CTkLabel(self.example_frame, text="This is example text", font=('Computer Modern', 15))
+        example_text_label.grid(row=1, column=0, padx=10, pady=10, sticky="new")
+
+
         internal_log_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
-        internal_log_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+        internal_log_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
         
-        font_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
-        font_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+        internal_log_frame.grid_columnconfigure(0, weight=1)
+        internal_log_frame.grid_rowconfigure(0, weight=1)
+        internal_log_label = ctk.CTkLabel(internal_log_frame, text="Debug Log", font=("Computer Modern",20))
+        internal_log_label.grid(row=0, column=0, padx=10, pady=10, sticky="ns")
+        
+        self.end_time_main = time.time()
+        self.settings.logging_setup(internal_log_frame)
+        self.settings.log_event("App Initialized",self.start_time_main, self.end_time_main)
+
+        # font_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
+        # font_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
         
     def uct_window(self):
         for i in range(9):
@@ -597,9 +671,9 @@ class GUI:
             entry = ctk.CTkEntry(self.ucttab, width=20)
             entry.grid(row=i+2, column=5, padx=10, pady=10, sticky="ew")
             self.output_entries.append(entry)
-
-            
+   
     def convert_units(self, type):
+        self.start_unit_convert_time = time.time()
         try:
             input_value = self.input_entries[type].get()
             if not input_value:
@@ -640,6 +714,8 @@ class GUI:
             
             self.output_entries[type].delete(0, 'end')
             self.output_entries[type].insert(0, f"{output_value:.4f}")
+            self.end_unit_convert_time = time.time()
+            self.settings.log_event("Unit Conversion Completed", self.start_unit_convert_time, self.end_unit_convert_time)
         
         except ValueError:
             self.output_entries[type].delete(0, 'end')
@@ -653,3 +729,5 @@ class GUI:
         def callback(event):
             self.convert_units(index)
         return callback
+    
+    
