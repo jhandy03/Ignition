@@ -1,5 +1,7 @@
 import math
-import sympy as sym
+# import sympy as sym
+from scipy.optimize import fsolve
+
 class MainCalculations:
     def __init__(self):
         pass
@@ -25,11 +27,22 @@ class MainCalculations:
         a2astar = self.aastar(M2,gamma)
         Astar = A2/a2astar
         
-        M1 = sym.symbols('M1')
-        a1astar = self.aastar(M1, gamma)
-        M1eqn = sym.Eq(A1/Astar,a1astar)
-        M1 = sym.solve(M1eqn,M1)
-        M1 = M1[0]
+        # M1 = sym.symbols('M1')
+        # a1astar = self.aastar(M1, gamma)
+        # M1eqn = sym.Eq(A1/Astar,a1astar)
+        # M1 = sym.solve(M1eqn,M1)
+        # M1 = M1[0]
+        
+        #originally used symp but that took about 5.3sec to run the full code.
+        #changed to scipy and got seemingly the same ans but code now runs in like 0.2sec
+        def equation(M1):
+            return (A1 / Astar) - self.aastar(M1, gamma)
+        M1_initial_guess = 0.5
+        M1_solution = fsolve(equation, M1_initial_guess)
+        M1 = M1_solution[0]
+       
+        
+        
         
         T2T0 = self.stagtemp(M2,gamma)
         T0 = T2/T2T0
@@ -66,4 +79,9 @@ class MainCalculations:
         return {'thrust': thrust, 'Tpost': Tpost, 'Ppost': Ppost, 'Mexit': Mexit, 'phi': phi,
                 'f_act': f_act, 'f_stoich': f_stoich}
         
-        
+    def validate_input(self,value):
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False

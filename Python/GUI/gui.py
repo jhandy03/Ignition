@@ -8,7 +8,8 @@ from UnitConversionToolbox.unit_conversion_toolbox import UnitConversionToolbox
 import random as rand
 from Settings.settings import Settings
 import time
-import datetime
+# import datetime
+# import threading
 
 
 class GUI:
@@ -18,9 +19,10 @@ class GUI:
         self.settings = Settings(self)
         self.main_window()
         
+        self.stop_run = False
         self.start_time_main = time.time()
         
-        # self.running = True #want to implement a start and stop button
+       
         
     def main_window(self):
         self.start_time_main = time.time()
@@ -488,10 +490,13 @@ class GUI:
 
     def run_ignition(self):
         self.startbutton.configure(state='disabled',text='Processing...')
-        self.root.update()
+        # self.stop_run = False
+        self.start_time_ignition = time.time()
+        self.settings.log_event("Ignition Calculations Started", 0,0)
+        self.root.update() 
         try:
             gamma = float(self.widget_instances[0].get_value())
-            R = float(self.widget_instances[1].get_value())
+            R_val = float(self.widget_instances[1].get_value())
             rho_air = float(self.widget_instances[2].get_value())
             bv_param = float(self.widget_instances[3].get_value())
             it_param = float(self.widget_instances[4].get_value())
@@ -513,21 +518,55 @@ class GUI:
             #add in the combustion equation stuff later. Not sure how to handle yet
             comb_temp = float(self.widget_instances_bottom[0].get_value())
             comb_pressure = float(self.widget_instances_bottom[1].get_value())
-            D = 2 #flame holder height (optimize to find this??)
+            D_len = 2 #flame holder height (optimize to find this??)
 
-            runignition = self.ignition.main_calculations(gamma, R, rho_air, egt, exit_velocity, bv_param, it_param, turb_blade_len,
-                                                        diff_length, straight_length, theta, D, noz_d, turb_d, mdot_in, mdot_fuel)
+            input_names = [ ('gamma',gamma), ('R',R_val), ('rho_air',rho_air), ('bv_param',bv_param), ('it_param',it_param), 
+                           ('mdot_in',mdot_in), ('mdot_fuel',mdot_fuel), ('exit_velocity',exit_velocity), ('turb_blade_len',turb_blade_len), 
+                           ('diff_length',diff_length), ('straight_length',straight_length), ('theta',theta), ('noz_d',noz_d), ('turb_d',turb_d), 
+                           ('egt',egt), ('input_pressure',input_pressure), ('comb_temp',comb_temp), ('comb_pressure',comb_pressure), ('D_len',D_len)]
 
-            self.widget_instances_output[0].set_value(str(runignition['thrust']))
-            self.widget_instances_output[1].set_value(str(runignition['Tpost']))
-            self.widget_instances_output[2].set_value(str(runignition['Ppost']))
-            self.widget_instances_output[3].set_value(str(runignition['Mexit']))
-            self.widget_instances_output[4].set_value(str(runignition['phi']))
-            self.widget_instances_output[5].set_value(str(runignition['f_act']))
-            self.widget_instances_output[6].set_value(str(runignition['f_stoich']))
-        finally:
-            self.startbutton.configure(state='normal', text='Start')
-            self.root.configure(cursor='')
+            #TODO: add input validation
+            for name, value in input_names:
+                self.ignition.validate_input(value)
+                if self.ignition.validate_input(value) is False:
+                    self.settings.log_event(f"Invalid input for {name}",0,0)
+                    self.startbutton.configure(state='normal',text='Start')
+                    return
+                else:
+                    self.settings.log_event(f"Input {name} validated successfully",0,0)
+                    
+                
+                
+            runignition = self.ignition.main_calculations(gamma, R_val, rho_air, egt, exit_velocity, bv_param, it_param, turb_blade_len,
+                                                        diff_length, straight_length, theta, D_len, noz_d, turb_d, mdot_in, mdot_fuel)
+            end_time_ignition = time.time()
+            time_check = end_time_ignition - self.start_time_ignition
+            
+            def update_outputs():
+                self.widget_instances_output[0].set_value(str(runignition['thrust']))
+                self.widget_instances_output[1].set_value(str(runignition['Tpost']))
+                self.widget_instances_output[2].set_value(str(runignition['Ppost']))
+                self.widget_instances_output[3].set_value(str(runignition['Mexit']))
+                self.widget_instances_output[4].set_value(str(runignition['phi']))
+                self.widget_instances_output[5].set_value(str(runignition['f_act']))
+                self.widget_instances_output[6].set_value(str(runignition['f_stoich']))
+                self.startbutton.configure(state='normal',text='Start')
+                self.settings.log_event("Ignition calculations completed", self.start_time_ignition, end_time_ignition)
+            
+            #wanted to throw in a small delay since if it runs too fast it feels weird to the user. Might
+            #want to adjust/ remove later as the calcs become more intensive/ take longer
+            if time_check <= 0.1: #TODO revisit
+                # rand_time = rand.randint(0,1)
+                # self.root.after(rand_time, update_outputs)
+                update_outputs()
+            else:
+                update_outputs()
+            
+        except Exception as e:
+            self.settings.log_event(f"Error during Ignition calculations: {e}", 0,0)
+            self.startbutton.configure(state='normal',text='Start')
+            return
+            
 
     def settings_window(self):
         for i in range(2):
@@ -581,6 +620,29 @@ class GUI:
         self.end_time_main = time.time()
         self.settings.logging_setup(internal_log_frame)
         self.settings.log_event("App Initialized",self.start_time_main, self.end_time_main)
+        
+        self.about_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
+        self.about_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
+        
+        self.about_frame.grid_columnconfigure(0, weight=1)
+        self.about_frame.grid_rowconfigure(0, weight=1)
+        self.about_frame.grid_rowconfigure(1, weight=1)
+        
+        about_label = ctk.CTkLabel(self.about_frame, text='About', font=("Computer Modern", 20))
+        about_label.grid(row=0,column=0,padx=10,pady=10,sticky="ns")
+
+        about_text = ctk.CTkTextbox(self.about_frame, width=500, height=225, font=("Computer Modern",15))
+        about_text.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        about_text.insert("end",
+            "Ignition was originally written by Jordan Handy during March 2025 in MATLAB. Its original use was to simplify repeated calculations when designing an afterburner for a small turbojet engine for MachWorks.\n\n"
+            "MachWorks is an undergraduate design team based out of Virginia Tech, focusing on high-speed jet-powered aircraft. Ignition was then expanded \nto include more functionality (thanks to JD Fiore), performing combustion calculations, unit conversions, and other engineering calculations.\n\n"
+            "As ambitions grew, the need for converting the code into a more robust and easy to collaborate on language arose. Formal talks about converting \nthe codebase to Python started in April 2025, with initial conversions starting in May the same year.\n\n"
+            "Since then, the code has been expanded to work with external programs for use in simulation and optimization. The end goal for Ignition is to be a \nfully-featured afterburner design tool that students can use to design and optimize afterburners for small, hobbyist turbojet engines."
+        )
+
+
+
+
 
         # font_frame = ctk.CTkFrame(self.settingstab, fg_color="#2b2b2b", border_width=2, border_color="#4a4a4a")
         # font_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")

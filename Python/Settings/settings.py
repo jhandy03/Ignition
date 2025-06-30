@@ -64,9 +64,6 @@ class Settings:
                     ax.tick_params(axis='y', colors=self.rcParams['ytick.color'])
                 fig.canvas.draw()
             
-        
-
-       
     def fontstyle(self):
         #TODO: implement once GUI is setup
         return
@@ -76,22 +73,22 @@ class Settings:
         return
     
     def logging_setup(self,frame):
-        self.logbox = ctk.CTkTextbox(frame, width=500, height=400, font=("Computer Modern", 15))
+        self.logbox = ctk.CTkTextbox(frame, width=500, height=225, font=("Computer Modern", 15), text_color = '#34a6c2') #TODO: revise color
         self.logbox.grid(row=1,column=0, padx=10, pady=10, sticky="nsew")
         
     def log_event(self,event_message, start_time, end_time):
         current_time = datetime.datetime.now().strftime('%I:%M:%S %p').lower()
         elapsed = end_time - start_time
-        log_message = f"{current_time} | {event_message} | wait time: {elapsed:.6f} sec \n"
+        if elapsed > 0:
+            log_message = f"{current_time} | {event_message} | Processing Time: {elapsed:.6f} sec \n"
+        elif elapsed <=0:
+            log_message = f"{current_time} | {event_message} \n"
+        else:
+            log_message = f"{current_time} | Error\n"
         
         self.logbox.configure(state='normal')
         self.logbox.insert("end", log_message)
         self.logbox.configure(state='disabled')
     
-    #TODO: want to implement a large text box that will log internal checks
-    # things like 'started calc' 'finished calc', 'started optimization', 'finished optimization'
-    # etc. I think this will also be where errors are displayed/ shown? Not sure how I want to display
-    # errors to the user yet. It should be useful to at least explain the errors though
-    
     #TODO: add progress bar
-    #TODO: add timer
+    
