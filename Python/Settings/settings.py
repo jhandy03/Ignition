@@ -73,7 +73,7 @@ class Settings:
         return
     
     def logging_setup(self,frame):
-        self.logbox = ctk.CTkTextbox(frame, width=500, height=225, font=("Computer Modern", 15), text_color = '#34a6c2') #TODO: revise color
+        self.logbox = ctk.CTkTextbox(frame, width=500, height=225, font=("Computer Modern", 15), text_color = "#cd7af3") #TODO: revise color #34a6c2
         self.logbox.grid(row=1,column=0, padx=10, pady=10, sticky="nsew")
         
     def log_event(self,event_message, start_time, end_time):

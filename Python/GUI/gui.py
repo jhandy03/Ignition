@@ -31,11 +31,6 @@ class GUI:
         ctk.set_appearance_mode("dark") #set default theme to dark. Will add ability to change later
         self.root._state_before_windows_set_titlebar_color = 'zoomed' #fullscreen the window
         
-        rand_num = rand.randint(0, 100)
-        if rand_num >=  95:
-            self.root.configure(cursor='right_ptr')
-        else:
-            pass
         
         #Creates the mains tabs of Ignition and then assigns them to variables. Makes things easier to type later
         tabs = ctk.CTkTabview(self.root, width=300, height=300, anchor="w",border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b") #anchor='w' make them left aligned
@@ -48,8 +43,17 @@ class GUI:
         self.ucttab = tabs.tab("Unit Conversion Toolbox")
         self.settings_window()
         self.uct_window()
+    
+        rand_num = rand.randint(0, 100)
+        if rand_num >=  95:
+            self.root.configure(cursor='right_ptr')
+            self.settings.log_event("cursor easter egg triggered :)",0,0)
+        else:
+            pass
         
-
+        
+        
+        
         #Breaks the main window into frames and sets their weights
         leftframe = ctk.CTkFrame(maintab,border_width=2, border_color="#4a4a4a", fg_color="#2b2b2b")
         leftframe.grid(row=0,column=0, padx=10, pady=10, sticky="nsew") 
@@ -605,7 +609,7 @@ class GUI:
 
         example_title_label = ctk.CTkLabel(self.example_frame, text="Example Title", font=("Courier New Bold", 20))
         example_title_label.grid(row=0, column=0, padx=10, pady=10, sticky="new")
-        example_text_label = ctk.CTkLabel(self.example_frame, text="This is example text", font=('Computer Modern', 15))
+        example_text_label = ctk.CTkLabel(self.example_frame, text="Example text", font=('Computer Modern', 15))
         example_text_label.grid(row=1, column=0, padx=10, pady=10, sticky="new")
 
 
