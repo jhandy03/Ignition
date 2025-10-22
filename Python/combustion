@@ -28,28 +28,32 @@ print(MW_fuel)
 # for i in range(len(gas.molecular_weights)):
 #     print(gas.molecular_weights[i])
 # print(len(gas.molecular_weights))
-    
+prevTemp = 0
+
 def balance(Temp_guess):
+    global prevTemp
     Temp_guess = float(Temp_guess)
-    gas.TP = T_initial, P_initial # important cantara
-    gas.set_equivalence_ratio(phi, fuel=fuel_comp, oxidizer=ox_comp)
+
+    gas.TP = Temp_guess, P_initial
 
     h_vapor = delta_h / gas.molecular_weights[0]
     h_init = gas.enthalpy_mass + h_vapor  # important cantara
-    
-    gas.TP = Temp_guess, P_initial
-    gas.equilibrate('HP') # important cantara
-    h_comb = gas.enthalpy_mass # important cantara
-    
-    residual = h_init - h_comb
-    
-    temp_guesses.append(Temp_guess)
-    residuals.append(residual)
-    
-    print(f"Temp_guess: {Temp_guess:.2f} K")
-    return residual
 
-final_temp = fsolve(balance, T_initial, xtol=1e-6)[0]
+    gas.equilibrate('HP')  # important cantara
+    h_comb = gas.enthalpy_mass  # important cantara
+
+    residual = h_init - h_comb
+
+    # Only append if Temp_guess is meaningfully different from prevTemp
+    if abs(Temp_guess - prevTemp) > 1e-3:
+        temp_guesses.append(Temp_guess)
+        residuals.append(residual)
+        print(f"Temp_guess: {Temp_guess:.2f} K")
+        prevTemp = Temp_guess
+
+    return residual  # always return residual for fsolve
+
+final_temp = fsolve(balance, T_initial, xtol=1e-3)[0]
 print(f"Adiabatic Flame Temperature: {final_temp:.2f} K")
 
 plt.figure(figsize=(8, 6))
